@@ -1,1 +1,44 @@
-ECHO is on.
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>ESP8266 WebSocket</title>
+</head>
+<body>
+  <div> Status <span id="status" style="font-weight: bold;"> disconnected </span> </div>
+  
+  <button onclick="onchange()" id="control" name="control" disabled="true"> Control </button>
+
+  <div> Result <span id="result" style="font-weight: bold;">  </span> </div>
+
+  <script type="text/javascript">
+    var control = document.getElementById('control');
+    var url = window.location.host; // hàm trả về url của trang hiện tại kèm theo port
+    var ws = new WebSocket('ws://' +url + '/ws'); // mở 1 websocket với port 8000
+    console.log('connecting...')
+    ws.onopen = function() //khi websocket được mở thì hàm này sẽ được thưc hiện
+    {
+      document.getElementById('status').innerHTML = 'Connected';
+      control.disabled = false; //khi websocket được mở, mới cho phép
+      console.log('connected...')
+    };
+  
+    ws.onmessage = function(evt) // sự kiện xảy ra khi client nhận dữ liệu từ server
+    {
+      console.log(evt.data)
+      if(evt.data == 'CONTROL_OFF') {
+        document.getElementById('result').innerHTML = 'Sucess!!';
+      }
+    };
+    ws.onclose = function() { // hàm này sẽ được thực hiện khi đóng websocket
+      control.disabled = true;
+      document.getElementById('status').innerHTML = 'Disconnected';
+    };
+
+    control.onchange = function() { // thực hiện thay đổi bật/tắt led
+      var control_status = 'CONTROL_ON';
+      document.getElementById('result').innerHTML = 'Processing...';
+      ws.send(control_status)
+    }
+  </script>
+</body>
+</html>
